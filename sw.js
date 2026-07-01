@@ -1,6 +1,7 @@
-const CACHE_NAME = 'photoid-pro-v1';
+const CACHE_NAME = 'photoid-pro-v2';
 const APP_SHELL = [
-  './ComposeurPhotoID_Client.html',
+  './',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -25,8 +26,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Ne jamais intercepter les appels vers le CDN du module IA de détourage
-  // (il gère son propre cache et a besoin du réseau au 1er chargement)
+  // Ne jamais intercepter les appels CDN du module IA de détourage
   if (url.hostname.includes('jsdelivr.net') || url.hostname.includes('staticimgly.com')) {
     return;
   }
