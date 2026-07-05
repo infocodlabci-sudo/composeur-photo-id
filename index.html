@@ -3,169 +3,251 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Composeur Photo ID PRO - Dépann'Print</title>
-<meta name="theme-color" content="#2563eb">
+<title>Composeur Photo ID PRO - InfoCodLab CI</title>
+<meta name="theme-color" content="#16171B">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Photo ID PRO">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Manrope:wght@400;500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-body{font-family:Arial;margin:0;background:#f0f0f0}
+/* ============================================================
+   TOKENS — identité "planche contact / atelier photo"
+   ============================================================ */
+:root{
+  --ink:#16171B;
+  --ink-2:#232429;
+  --paper:#F6F4EF;
+  --surface:#FFFFFF;
+  --line:#E4E0D6;
+  --line-soft:#EDEAE1;
+  --cyan:#0E7C86;
+  --cyan-deep:#0A5F67;
+  --magenta:#B5245A;
+  --amber:#D98F2B;
+  --danger:#C4433F;
+  --success:#1F8A4C;
+  --ink-soft:#54565D;
+  --muted:#93949A;
+  --font-display:'Space Grotesk',-apple-system,'Segoe UI',sans-serif;
+  --font-body:'Manrope',-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'JetBrains Mono','SFMono-Regular',Consolas,monospace;
+  --radius:10px;
+}
 
-.nav{display:flex;gap:10px;max-width:800px;margin:10px auto 0;padding:0 10px}
-.nav button{flex:1;padding:14px;font-size:15px;border:none;border-radius:6px 6px 0 0;cursor:pointer;background:#e5e7eb;font-weight:bold;color:#444}
-.nav button.active{background:#2563eb;color:white}
+*{box-sizing:border-box}
+body{font-family:var(--font-body);margin:0;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--font-display);margin:0}
+:focus-visible{outline:2.5px solid var(--cyan);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 
-#ui-page,#preview-page{background:white;max-width:800px;margin:0 auto 20px;border-radius:0 0 8px 8px;padding:25px;display:none;box-sizing:border-box}
-#ui-page.active,#preview-page.active{display:block}
+/* ---------- Registration-mark corner brackets (signature visuelle) ---------- */
+.bracket{position:relative}
+.bracket::before,.bracket::after{content:'';position:absolute;width:13px;height:13px;pointer-events:none}
+.bracket::before{top:-1px;left:-1px;border-top:2px solid var(--cyan);border-left:2px solid var(--cyan)}
+.bracket::after{bottom:-1px;right:-1px;border-bottom:2px solid var(--cyan);border-right:2px solid var(--cyan)}
+.bracket--magenta::before,.bracket--magenta::after{border-color:var(--magenta)}
 
-input,select{width:100%;padding:12px;margin:6px 0;font-size:15px;border:1px solid #ddd;border-radius:5px;box-sizing:border-box}
-button.full{width:100%;padding:12px;margin:6px 0;font-size:15px;border:none;border-radius:5px;cursor:pointer;font-weight:bold;background:#2563eb;color:white}
-.btn-green{background:#16a34a}
-.btn-red{background:#dc2626}
-.btn-gray{background:#6b7280}
+/* ---------- Nav (chrome sombre) ---------- */
+.nav{display:flex;gap:2px;max-width:820px;margin:0 auto;background:var(--ink);padding:6px;border-radius:14px 14px 0 0;position:sticky;top:0;z-index:50}
+.nav button{flex:1;padding:13px 6px;font-size:13.5px;border:none;border-radius:9px;cursor:pointer;background:transparent;font-family:var(--font-display);font-weight:700;color:#9799A3;letter-spacing:.2px;transition:background .15s,color .15s}
+.nav button.active{background:var(--surface);color:var(--ink)}
 
-.client-box{border:2px solid #e5e7eb;padding:12px;margin:10px 0;border-radius:6px}
-.client-header{display:flex;gap:6px}
-.client-header input{flex:1;margin:0}
-.client-header button{width:auto;padding:10px 14px;margin:0;border:none;border-radius:5px;font-weight:bold;cursor:pointer;color:white;background:#dc2626}
+.page{background:var(--surface);max-width:820px;margin:0 auto 28px;padding:22px 20px 26px;display:none;box-sizing:border-box;border-radius:0 0 14px 14px;box-shadow:0 1px 0 var(--line)}
+.page.active{display:block}
 
-.client-row2{display:flex;gap:8px;align-items:center;margin-top:8px}
-.client-row2 .file-wrap{flex:1}
+.page-head{margin-bottom:16px}
+.eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan-deep);font-weight:700}
+.page-head h1{font-size:22px;font-weight:700;margin-top:4px}
+.page-head h1 .accent{color:var(--cyan)}
+
+/* ---------- Stats en "afficheur" ---------- */
+.stat-strip{display:flex;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:9px;overflow:hidden;margin:14px 0 18px}
+.stat-chip{flex:1;background:var(--paper);text-align:center;padding:10px 4px}
+.stat-chip__value{display:block;font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--ink)}
+.stat-chip__label{display:block;font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+
+/* ---------- Champs ---------- */
+label.field-label{font-size:11.5px;color:var(--ink-soft);font-weight:700;display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+input,select{width:100%;padding:12px 13px;margin:6px 0;font-size:15px;font-family:var(--font-body);border:1.5px solid var(--line);border-radius:8px;box-sizing:border-box;background:var(--surface);color:var(--ink)}
+input:focus,select:focus{border-color:var(--cyan)}
+input[type=file]{padding:9px}
+input[type=color]{padding:2px;height:38px;cursor:pointer}
+
+/* ---------- Boutons ---------- */
+.btn{width:100%;padding:13px;margin:6px 0;font-size:14.5px;border:none;border-radius:9px;cursor:pointer;font-weight:700;font-family:var(--font-body);color:white;background:var(--cyan);transition:filter .12s,transform .05s}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:scale(.99)}
+.btn-success{background:var(--success)}
+.btn-danger{background:var(--danger)}
+.btn-muted{background:#6B6E76}
+.btn-wave{background:#00C851}
+.btn-whatsapp{background:#25D366}
+.btn-outline{background:transparent;border:1.5px solid var(--line);color:var(--ink-soft)}
+.btn-auto{width:auto;display:inline-block}
+
+/* ---------- Bannière essai / licence ---------- */
+.banner{background:#FBF0DC;border:1.5px solid var(--amber);border-radius:9px;padding:11px 14px;margin-bottom:14px;font-size:13px;color:#7A5417;font-weight:700;text-align:center}
+.banner a{color:#7A5417;text-decoration:underline}
+.banner.ok{background:#E7F5EC;border-color:var(--success);color:#155C31}
+
+/* ---------- Carte client (planche contact) ---------- */
+.client-card{border:1.5px solid var(--line);padding:14px;margin:12px 0;border-radius:var(--radius);background:var(--surface);position:relative}
+.client-frame-no{position:absolute;top:-9px;left:12px;background:var(--ink);color:#fff;font-family:var(--font-mono);font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:5px;letter-spacing:.5px}
+.client-head{display:flex;gap:8px;margin-top:6px}
+.client-head input{flex:1;margin:0;font-weight:700}
+.client-head button{width:auto;padding:0 14px;margin:0;border:none;border-radius:8px;font-weight:700;cursor:pointer;color:white;background:var(--danger);font-size:13px}
+
+.client-row2{display:flex;gap:8px;align-items:flex-start;margin-top:10px;flex-wrap:wrap}
+.client-row2 .file-wrap{flex:1;min-width:150px}
 .client-row2 input[type=file]{margin:0}
-.qty-wrap{width:160px;flex-shrink:0}
+.qty-wrap{width:150px;flex-shrink:0}
 .qty-wrap select{margin:0}
-.qty-wrap label{font-size:11px;color:#666;display:block;margin-bottom:2px}
 
-.preview-photo{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
-.preview-photo img{width:38px;height:48px;object-fit:cover;border:1px solid #ccc;border-radius:2px}
-.preview-photo span{font-size:13px;color:#444}
-.preview-photo .actions{display:flex;gap:6px;margin-left:auto}
-.preview-photo .actions button{width:auto;padding:8px 12px;border:none;border-radius:5px;font-weight:bold;cursor:pointer;color:white;margin:0}
+.preview-photo{display:flex;align-items:center;gap:10px;margin-top:11px;padding-top:11px;border-top:1px dashed var(--line);flex-wrap:wrap}
+.preview-photo img{width:36px;height:46px;object-fit:cover;border:1px solid var(--line);border-radius:3px}
+.preview-photo span{font-size:12.5px;color:var(--ink-soft);flex:1;min-width:120px}
+.preview-photo .actions{display:flex;gap:6px}
+.preview-photo .actions button{width:auto;padding:8px 11px;border:none;border-radius:7px;font-weight:700;cursor:pointer;color:white;margin:0;font-size:12.5px}
+.empty-note{font-size:12.5px;color:var(--muted);margin:10px 0 0;font-style:italic}
 
-.stats{font-size:11pt;background:#eff6ff;padding:10px;border-radius:5px;margin:10px 0;font-weight:bold;text-align:center}
+/* ---------- Aperçu A4 : "table lumineuse" ---------- */
+.light-table{background:var(--ink-2);border-radius:12px;padding:18px 8px;margin:-4px -4px 12px}
+.print-bar{text-align:center;margin-bottom:14px}
+.print-bar .btn-auto{padding:13px 34px}
+.print-caption{text-align:center;font-size:11px;color:#AEB0B8;font-family:var(--font-mono);margin-top:4px}
 
-.a4-page{width:210mm;min-height:297mm;margin:0 auto 15px;padding:4mm;box-sizing:border-box;background:white;border:1px solid #ccc}
+.a4-page{width:210mm;min-height:297mm;margin:0 auto 16px;padding:4mm;box-sizing:border-box;background:white;box-shadow:0 6px 20px rgba(0,0,0,.35);position:relative}
 .photo-row{display:flex;gap:1mm;margin-bottom:0.5mm;justify-content:center}
 .photo-cell{display:flex;flex-direction:column;width:35mm}
-.client-label{font-size:6pt;line-height:1.05;font-weight:bold;margin-bottom:0.3mm;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.client-label{font-size:6pt;line-height:1.05;font-weight:bold;margin-bottom:0.3mm;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Arial,sans-serif}
 .photo-box{width:35mm;height:45mm;border:0.5px solid #000;overflow:hidden;flex-shrink:0}
 .photo-box img{width:100%;height:100%;object-fit:cover}
 .empty-label{height:6pt;margin-bottom:0.3mm}
+.empty-page-msg{display:flex;align-items:center;justify-content:center;color:#999;flex-direction:column;gap:8px;min-height:200px}
+.empty-page-msg span{font-size:34px}
 
-.print-bar{text-align:center;margin-bottom:12px}
-.print-bar button{width:auto;display:inline-block;padding:12px 30px}
-
-/* --- Modal de recadrage --- */
-.crop-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;z-index:1000;padding:15px;box-sizing:border-box}
-.crop-overlay.active{display:flex}
-.crop-box{background:white;padding:20px;border-radius:8px;max-width:90vw;max-height:92vh;overflow-y:auto;text-align:center;box-sizing:border-box}
-.crop-box h3{margin-top:0}
-.crop-container{width:210px;height:270px;overflow:hidden;position:relative;border:2px solid #2563eb;margin:10px auto;background:#222;touch-action:none;cursor:grab}
-.crop-container.dragging{cursor:grabbing}
-#crop-img{position:absolute;top:0;left:0;user-select:none;pointer-events:none}
-.crop-hint{font-size:12px;color:#666;margin:4px 0 10px}
-.crop-buttons{display:flex;gap:10px;margin-top:10px}
-.crop-buttons button{flex:1;padding:12px;border:none;border-radius:5px;font-weight:bold;cursor:pointer;color:white;margin:0}
-
-.bg-tools{border-top:1px solid #eee;margin-top:12px;padding-top:12px;text-align:left}
-.btn-purple{background:#7c3aed;color:white;width:100%;padding:11px;border:none;border-radius:5px;font-weight:bold;cursor:pointer;font-size:14px}
-.btn-purple:disabled{background:#c4b5fd;cursor:wait}
-#detoure-status{display:block;font-size:11px;color:#7c3aed;margin-top:6px;min-height:14px}
-.bg-colors{margin-top:10px}
-.bg-colors label{font-size:12px;color:#666;display:block;margin-bottom:6px}
-.bg-swatches{display:flex;gap:8px;align-items:center}
-.bg-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:2px solid #ddd;box-sizing:border-box}
-.bg-swatch.selected{border:3px solid #111;box-shadow:0 0 0 2px white inset}
-#bg-custom{width:30px;height:30px;padding:0;border:2px solid #ddd;border-radius:50%;cursor:pointer;margin:0;overflow:hidden}
-.bg-hint{font-size:11px;color:#999;margin-top:6px}
+.watermark-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;align-content:space-evenly;justify-content:space-around;z-index:5}
+.watermark-overlay span{font-size:20pt;font-weight:900;color:rgba(241, 7, 7, 0.897);transform:rotate(-30deg);white-space:nowrap;text-transform:uppercase;letter-spacing:2px;font-family:var(--font-display)}
 
 @media print{
-  .nav,#ui-page,.print-bar,.crop-overlay{display:none !important}
-  #preview-page{display:block !important;padding:0;border-radius:0}
+  .nav,.page:not(#page-preview),.print-bar,.crop-overlay,.print-caption{display:none !important}
+  #page-preview{display:block !important;padding:0;border-radius:0;box-shadow:none}
+  .light-table{background:none;padding:0;margin:0}
   body{background:white}
-  .a4-page{border:none;margin:0;page-break-after:always}
+  .a4-page{box-shadow:none;margin:0;page-break-after:always}
 }
 
-/* --- Watermark version d'essai --- */
-.a4-page{position:relative}
-.watermark-overlay{position:absolute;inset:0;pointer-events:none;overflow:hidden;display:flex;flex-wrap:wrap;align-content:space-evenly;justify-content:space-around;z-index:5}
-.watermark-overlay span{font-size:20pt;font-weight:900;color:rgba(220,38,38,0.16);transform:rotate(-30deg);white-space:nowrap;text-transform:uppercase;letter-spacing:2px}
+/* ---------- Licence : carte façon ID ---------- */
+.id-card{border-radius:14px;padding:20px;margin-bottom:16px;position:relative;overflow:hidden}
+.id-card--offer{background:linear-gradient(155deg,var(--ink) 0%,#2B1420 100%);color:#fff}
+.id-card--code{background:var(--paper);border:1.5px solid var(--line)}
+.id-card .eyebrow{color:#E8B8CB}
+.id-card--code .eyebrow{color:var(--cyan-deep)}
+.id-card h3{font-size:17px;margin:5px 0 12px;color:inherit}
+.id-price{font-family:var(--font-mono);font-size:30px;font-weight:700;margin:4px 0}
+.id-price small{font-size:12.5px;font-weight:500;color:#C9CBD3;font-family:var(--font-body);display:block;margin-top:2px}
+.id-card--offer .id-price small{color:#C9A3B4}
+.feature-list{list-style:none;padding:0;margin:14px 0;font-size:13.5px}
+.feature-list li{margin:7px 0;padding-left:22px;position:relative;color:#E3E4EA}
+.feature-list li::before{content:'✓';position:absolute;left:0;color:var(--cyan);font-weight:700}
+.id-card--offer .feature-list li{color:#EDE4E9}
+.id-hint{font-size:12px;color:#A7A9B1;margin:10px 0 4px}
+.id-card--offer .id-hint{color:#CBB0BC}
 
-/* --- Licence --- */
-.lic-banner{background:#fef3c7;border:1.5px solid #f59e0b;border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#92400e;font-weight:bold;text-align:center}
-.lic-banner.ok{background:#dcfce7;border-color:#16a34a;color:#166534}
-.lic-card{background:#faf5ff;border:2px solid #7c3aed;border-radius:8px;padding:18px;margin-bottom:14px}
-.lic-card h3{margin:0 0 8px;color:#7c3aed;font-size:16px}
-.lic-price{font-size:26px;font-weight:900;color:#111;margin:6px 0}
-.lic-price small{font-size:13px;font-weight:normal;color:#666}
-.lic-features{font-size:13px;color:#333;margin:10px 0;padding-left:18px}
-.lic-features li{margin:4px 0}
-.btn-wave{background:#00C851;color:white}
-.code-input-row{display:flex;gap:8px;margin-top:6px}
-.code-input-row input{flex:1;font-family:monospace;letter-spacing:1px;text-transform:uppercase;margin:0}
-.code-input-row button{width:auto;padding:12px 16px;margin:0}
-.lic-status-line{font-size:12px;color:#666;margin-top:4px}
-.paywall-box{background:#fee2e2;border:2px solid #dc2626;border-radius:8px;padding:16px;margin:14px 0;text-align:center}
-.paywall-box p{margin:0 0 10px;color:#991b1b;font-weight:bold;font-size:14px}
+.code-row{display:flex;gap:8px;margin-top:8px}
+.code-row input{flex:1;font-family:var(--font-mono);letter-spacing:1px;text-transform:uppercase;margin:0}
+.code-row button{width:auto;padding:12px 18px;margin:0}
+.lic-msg{font-size:12.5px;margin-top:6px;font-weight:600}
+
+/* ---------- Modal recadrage ---------- */
+.crop-overlay{display:none;position:fixed;inset:0;background:rgba(15,15,18,0.72);align-items:center;justify-content:center;z-index:1000;padding:15px;box-sizing:border-box}
+.crop-overlay.active{display:flex}
+.crop-box{background:var(--surface);padding:22px;border-radius:14px;max-width:90vw;max-height:92vh;overflow-y:auto;text-align:center;box-sizing:border-box}
+.crop-box h3{margin-top:0;font-size:17px}
+.crop-container{width:210px;height:270px;overflow:hidden;position:relative;border:2px solid var(--cyan);border-radius:6px;margin:10px auto;background:#1A1B1F;touch-action:none;cursor:grab}
+.crop-container.dragging{cursor:grabbing}
+#crop-img{position:absolute;top:0;left:0;user-select:none;pointer-events:none}
+.crop-hint{font-size:12px;color:var(--ink-soft);margin:6px 0 12px}
+.crop-buttons{display:flex;gap:10px;margin-top:14px}
+.crop-buttons button{flex:1;padding:13px;border:none;border-radius:9px;font-weight:700;cursor:pointer;color:white;margin:0}
 </style>
 </head>
 <body>
 
 <div class="nav">
-<button id="nav-config" class="active" onclick="switchView('config')">⚙️ Configuration</button>
-<button id="nav-preview" onclick="switchView('preview')">👁️ Aperçu A4</button>
-<button id="nav-licence" onclick="switchView('licence')">🔑 Licence</button>
+<button id="nav-config" class="active" onclick="switchView('config')">⚙ Configuration</button>
+<button id="nav-preview" onclick="switchView('preview')">👁 Aperçu A4</button>
+<button id="nav-licence" onclick="switchView('licence')">🪪 Licence</button>
 </div>
 
-<div id="ui-page" class="active">
-<h2 style="margin-top:0">📸 Composeur PRO - Multi-Clients</h2>
-<div id="lic-banner-config"></div>
-<div class="stats" id="stats">Clients: 0 | Photos: 0 | Pages A4: 0</div>
+<div id="page-config" class="page active">
+  <div class="page-head">
+    <span class="eyebrow">InfoCodLab CI</span>
+    <h1>Composeur Photo ID <span class="accent">PRO</span></h1>
+  </div>
 
-<div id="clients-list"></div>
+  <div id="lic-banner-config"></div>
 
-<button class="full" onclick="ajouterClient()">+ Ajouter un client</button>
+  <div class="stat-strip">
+    <div class="stat-chip"><span class="stat-chip__value" id="statClients">0</span><span class="stat-chip__label">Clients</span></div>
+    <div class="stat-chip"><span class="stat-chip__value" id="statPhotos">0</span><span class="stat-chip__label">Photos</span></div>
+    <div class="stat-chip"><span class="stat-chip__value" id="statPages">0</span><span class="stat-chip__label">Pages A4</span></div>
+  </div>
 
-<hr>
-<button class="full btn-green" onclick="switchView('preview')" style="font-size:18px">👁️ Voir l'aperçu A4</button>
-<button class="full btn-red" onclick="resetTout()">Tout réinitialiser</button>
+  <div id="clients-list"></div>
+
+  <button class="btn" onclick="ajouterClient()">+ Ajouter un client</button>
+
+  <hr style="border:none;border-top:1px solid var(--line);margin:18px 0">
+  <button class="btn btn-success" onclick="switchView('preview')" style="font-size:16px;padding:15px">👁 Voir l'aperçu A4</button>
+  <button class="btn btn-outline" onclick="resetTout()">Tout réinitialiser</button>
 </div>
 
-<div id="preview-page">
-<div class="print-bar">
-<button class="btn-green" onclick="window.print()">🖨️ Imprimer</button>
-</div>
-<div id="pages-container"></div>
+<div id="page-preview" class="page">
+  <div class="light-table">
+    <div class="print-bar">
+      <button class="btn btn-success btn-auto" onclick="window.print()">🖨 Imprimer</button>
+    </div>
+    <div id="pages-container"></div>
+    <p class="print-caption">INFOCODLAB CI · FORMAT 35×45MM</p>
+  </div>
 </div>
 
-<div id="licence-page" style="background:white;max-width:800px;margin:0 auto 20px;border-radius:0 0 8px 8px;padding:25px;display:none;box-sizing:border-box">
-  <h2 style="margin-top:0">🔑 Licence</h2>
+<div id="page-licence" class="page">
+  <div class="page-head">
+    <span class="eyebrow">Accès complet</span>
+    <h1>Ma <span class="accent">Licence</span></h1>
+  </div>
+
   <div id="lic-status-box"></div>
 
   <div id="lic-purchase-block">
-    <div class="lic-card">
-      <h3>⭐ Licence à vie — Composeur Photo ID PRO</h3>
-      <div class="lic-price" id="lic-price-display">2 500 FCFA <small>(paiement unique, sans abonnement)</small></div>
-      <ul class="lic-features">
-        <li>✅ Nombre de clients illimité par planche</li>
-        <li>✅ Aucun filigrane sur les pages imprimées</li>
-        <li>✅ Détourage automatique IA + couleurs de fond inclus</li>
-        <li>✅ Fonctionne hors-ligne une fois activée</li>
+    <div class="id-card id-card--offer bracket bracket--magenta">
+      <span class="eyebrow">Licence à vie</span>
+      <h3>Composeur Photo ID PRO</h3>
+      <div class="id-price">3 000 FCFA<small>(PRIX PROMOTIONNEL)</small><small>Paiement unique — aucun abonnement</small></div>
+      <ul class="feature-list">
+        <li>Nombre de clients illimité par planche</li>
+        <li>Aucun filigrane sur les pages imprimées</li>
+        <li>Fonctionne hors-ligne une fois activée</li>
       </ul>
-      <button class="full btn-wave" onclick="doWavePayment()">📲 Payer via Wave</button>
-      <p style="font-size:12px;color:#666;margin-top:8px">Après paiement, envoie ta capture d'écran du reçu Wave sur WhatsApp pour recevoir ton code de licence.</p>
-      <button class="full" style="background:#25D366" onclick="contactWhatsApp()">💬 Envoyer mon reçu sur WhatsApp</button>
+      <button class="btn btn-wave" onclick="doWavePayment()">📲 Payer avec Wave</button>
+      <p class="id-hint">Après paiement, envoie ta capture d'écran du reçu Wave sur WhatsApp pour recevoir ton code de licence.</p>
+      <button class="btn btn-whatsapp" onclick="contactWhatsApp()">💬 Envoyer mon reçu sur WhatsApp</button>
     </div>
 
-    <div class="lic-card" style="background:#f0f9ff;border-color:#2563eb">
-      <h3 style="color:#2563eb">🔓 J'ai déjà un code de licence</h3>
-      <div class="code-input-row">
+    <div class="id-card id-card--code bracket">
+      <span class="eyebrow">J'ai déjà un code</span>
+      <h3 style="color:var(--ink)">Activer ma licence</h3>
+      <div class="code-row">
         <input type="text" id="codeInput" placeholder="CPID-XXXX-XXXX-XXXX" oninput="formatLicenseInput(this)">
-        <button class="btn-green" onclick="activateLicenseCode()">Activer</button>
+        <button class="btn btn-success btn-auto" onclick="activateLicenseCode()">Activer</button>
       </div>
-      <div id="lic-code-msg" class="lic-status-line"></div>
+      <div id="lic-code-msg" class="lic-msg"></div>
     </div>
   </div>
 </div>
@@ -173,49 +255,19 @@ button.full{width:100%;padding:12px;margin:6px 0;font-size:15px;border:none;bord
 <!-- Modal de recadrage -->
 <div id="crop-modal" class="crop-overlay">
   <div class="crop-box">
-    <h3>✂️ Ajuster la photo</h3>
+    <h3>✂ Ajuster la photo</h3>
     <div class="crop-container" id="crop-container">
       <img id="crop-img" draggable="false">
     </div>
-    <div class="crop-hint">Glisse la photo pour la repositionner, utilise le zoom pour ajuster le cadrage (format 35x45mm)</div>
-    <label style="font-size:12px;color:#666;text-align:left;display:block">Zoom</label>
+    <div class="crop-hint">Glisse la photo pour la repositionner, utilise le zoom pour ajuster le cadrage (format 35×45mm)</div>
+    <label class="field-label" style="text-align:left">Zoom</label>
     <input type="range" id="crop-zoom" min="100" max="300" value="100" oninput="onZoomChange(this.value)">
-
-    <div class="bg-tools">
-      <button class="btn-purple" id="btn-detoure" onclick="detourerPhoto()">🪄 Détourer l'arrière-plan (IA)</button>
-      <span id="detoure-status"></span>
-      <div class="bg-colors">
-        <label>Couleur de fond (appliquée après détourage)</label>
-        <div class="bg-swatches">
-          <div class="bg-swatch" style="background:#ffffff" data-color="#ffffff" onclick="choisirFond('#ffffff')" title="Blanc"></div>
-          <div class="bg-swatch" style="background:#1e40af" data-color="#1e40af" onclick="choisirFond('#1e40af')" title="Bleu"></div>
-          <div class="bg-swatch" style="background:#dc2626" data-color="#dc2626" onclick="choisirFond('#dc2626')" title="Rouge"></div>
-          <input type="color" id="bg-custom" value="#22c55e" onchange="choisirFond(this.value)" title="Couleur personnalisée">
-        </div>
-        <div class="bg-hint">Astuce : la première utilisation télécharge le modèle IA (~40 Mo, une seule fois — besoin d'internet)</div>
-      </div>
-    </div>
-
     <div class="crop-buttons">
-      <button class="btn-red" onclick="annulerCrop()">Annuler</button>
-      <button class="btn-green" onclick="validerCrop()">Valider</button>
+      <button class="btn-danger" onclick="annulerCrop()">Annuler</button>
+      <button class="btn-success" onclick="validerCrop()">Valider</button>
     </div>
   </div>
 </div>
-
-<script type="module">
-  window.imglyReady = false;
-  import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/dist/index.mjs")
-    .then(mod => {
-      window.imglyRemoveBackground = mod.default;
-      window.imglyReady = true;
-      console.log('Module détourage IA chargé.');
-    })
-    .catch(err => {
-      console.error('Échec du chargement du module de détourage IA :', err);
-      window.imglyLoadError = err;
-    });
-</script>
 
 <script>
 const QUANTITES = [1,2,3,4,5,6,8,12];
@@ -225,7 +277,7 @@ let clients = [];
 /* ===================== LICENCE ===================== */
 // Numéro Wave/Orange Money à modifier avec ton vrai numéro avant publication
 const WAVE_NUMBER = '2250160243904'; // format international sans le +
-const PRICE_LICENCE = 2500; // FCFA — doit rester identique au prix configuré côté admin
+const PRICE_LICENCE = 7500; // FCFA — doit rester identique au prix configuré côté admin
 const TRIAL_MAX_CLIENTS = 3;
 
 // Même algorithme que le dashboard admin : ne pas modifier sans modifier l'admin aussi
@@ -260,10 +312,10 @@ function refreshLicenceUI(){
   const purchaseBlock = document.getElementById('lic-purchase-block');
   if(isUnlocked()){
     const code = localStorage.getItem('cpid_active_code');
-    statusBox.innerHTML = `<div class="lic-banner ok">✅ Licence active — Code : ${escapeHtml(code)}</div>`;
+    statusBox.innerHTML = `<div class="banner ok">✅ Licence active — Code : ${escapeHtml(code)}</div>`;
     purchaseBlock.style.display = 'none';
   }else{
-    statusBox.innerHTML = `<div class="lic-banner">🔓 Version d'essai — ${clients.length}/${TRIAL_MAX_CLIENTS} clients utilisés, filigrane actif sur l'impression</div>`;
+    statusBox.innerHTML = `<div class="banner">🔓 Version d'essai — ${clients.length}/${TRIAL_MAX_CLIENTS} clients utilisés, filigrane actif sur l'impression</div>`;
     purchaseBlock.style.display = 'block';
   }
   updateConfigBanner();
@@ -275,7 +327,7 @@ function updateConfigBanner(){
   if(isUnlocked()){
     el.innerHTML = '';
   }else{
-    el.innerHTML = `<div class="lic-banner">🔓 Essai gratuit : ${clients.length}/${TRIAL_MAX_CLIENTS} clients · <a href="#" onclick="switchView('licence');return false" style="color:#92400e">Activer ma licence</a></div>`;
+    el.innerHTML = `<div class="banner">🔓 Essai gratuit : ${clients.length}/${TRIAL_MAX_CLIENTS} clients · <a href="#" onclick="switchView('licence');return false">Activer ma licence</a></div>`;
   }
 }
 
@@ -295,15 +347,15 @@ function activateLicenseCode(){
   const msgEl = document.getElementById('lic-code-msg');
   if(!isValidLicenseCode(raw)){
     msgEl.innerHTML = '❌ Code invalide. Vérifie la saisie ou contacte le support.';
-    msgEl.style.color = '#dc2626';
+    msgEl.style.color = 'var(--danger)';
     return;
   }
   localStorage.setItem('cpid_active_code', raw);
   msgEl.innerHTML = '✅ Licence activée ! Profite de l\'outil sans limite.';
-  msgEl.style.color = '#16a34a';
+  msgEl.style.color = 'var(--success)';
   refreshLicenceUI();
   afficherClients();
-  if(document.getElementById('preview-page').classList.contains('active')) genererPlanche();
+  if(document.getElementById('page-preview').classList.contains('active')) genererPlanche();
 }
 
 function doWavePayment(){
@@ -314,21 +366,25 @@ function doWavePayment(){
 function contactWhatsApp(){
   const ref = 'CPID-REQ-' + Date.now().toString(36).toUpperCase().slice(-6);
   const msg = encodeURIComponent(
-    `Bonjour Dépann'Print 👋\n\nJe viens de payer ${PRICE_LICENCE.toLocaleString('fr-CI')} FCFA via Wave pour la licence Composeur Photo ID PRO.\n\nMa référence : *${ref}*\n\nJ'ai joint la capture du reçu Wave. Merci de me confirmer mon code de licence 🙏`
+    `Bonjour InfoCodLab CI 👋\n\nJe viens de payer ${PRICE_LICENCE.toLocaleString('fr-CI')} FCFA via Wave pour la licence Composeur Photo ID PRO.\n\nMa référence : *${ref}*\n\nJ'ai joint la capture du reçu Wave. Merci de me confirmer mon code de licence 🙏`
   );
   window.open(`https://wa.me/${WAVE_NUMBER}?text=${msg}`, '_blank');
 }
 
+/* ===================== NAVIGATION ===================== */
+
 function switchView(view){
-  document.getElementById('ui-page').classList.toggle('active', view==='config');
-  document.getElementById('preview-page').classList.toggle('active', view==='preview');
-  document.getElementById('licence-page').style.display = view==='licence' ? 'block' : 'none';
+  document.getElementById('page-config').classList.toggle('active', view==='config');
+  document.getElementById('page-preview').classList.toggle('active', view==='preview');
+  document.getElementById('page-licence').classList.toggle('active', view==='licence');
   document.getElementById('nav-config').classList.toggle('active', view==='config');
   document.getElementById('nav-preview').classList.toggle('active', view==='preview');
   document.getElementById('nav-licence').classList.toggle('active', view==='licence');
   if(view==='preview') genererPlanche();
   if(view==='licence') refreshLicenceUI();
 }
+
+/* ===================== CLIENTS ===================== */
 
 function ajouterClient(){
   if(!isUnlocked() && clients.length >= TRIAL_MAX_CLIENTS){
@@ -337,28 +393,30 @@ function ajouterClient(){
     return;
   }
   const id = Date.now();
-  clients.push({id:id, nom:'Client '+(clients.length+1), photo:null, original:null, transparent:null, bgColor:null, quantite:4});
+  clients.push({id:id, nom:'Client '+(clients.length+1), photo:null, original:null, quantite:4});
   afficherClients();
 }
 
 function afficherClients(){
   let html = '';
-  clients.forEach(c=>{
+  clients.forEach((c, idx)=>{
+    const frameNo = String(idx+1).padStart(2,'0');
     const optionsQte = QUANTITES.map(q=>
       `<option value="${q}" ${q==c.quantite?'selected':''}>${q} photo${q>1?'s':''}</option>`
     ).join('');
 
-    html += `<div class="client-box">
-      <div class="client-header">
+    html += `<div class="client-card bracket">
+      <span class="client-frame-no">N° ${frameNo}</span>
+      <div class="client-head">
         <input value="${escapeAttr(c.nom)}" oninput="renommerClient(${c.id},this.value)">
-        <button onclick="supprimerClient(${c.id})">Supprimer</button>
+        <button onclick="supprimerClient(${c.id})">Suppr.</button>
       </div>
       <div class="client-row2">
         <div class="file-wrap">
           <input type="file" accept="image/*" onchange="ajouterPhoto(${c.id},this)">
         </div>
         <div class="qty-wrap">
-          <label>Nombre de photos</label>
+          <label class="field-label">Quantité</label>
           <select onchange="changerQuantite(${c.id},this.value)">${optionsQte}</select>
         </div>
       </div>
@@ -375,12 +433,12 @@ function afficherClients(){
           <img src="${c.photo}">
           <span>Photo recadrée — ${c.quantite} exemplaire${c.quantite>1?'s':''} sur la feuille</span>
           <div class="actions">
-            <button class="btn-gray" onclick="rouvrirCrop(${c.id})">✂️ Recadrer</button>
-            <button class="btn-red" onclick="supprimerPhoto(${c.id})">×</button>
+            <button class="btn-muted" onclick="rouvrirCrop(${c.id})">✂ Recadrer</button>
+            <button class="btn-danger" onclick="supprimerPhoto(${c.id})">×</button>
           </div>
         </div>`;
       } else {
-        div.innerHTML = `<p style="font-size:12px;color:#999;margin:8px 0 0">Aucune photo choisie</p>`;
+        div.innerHTML = `<p class="empty-note">Aucune photo choisie pour l'instant</p>`;
       }
     }
   });
@@ -410,8 +468,6 @@ function supprimerPhoto(id){
   const c = clients.find(c=>c.id==id);
   c.photo = null;
   c.original = null;
-  c.transparent = null;
-  c.bgColor = null;
   afficherClients();
 }
 
@@ -421,8 +477,6 @@ function ajouterPhoto(id,input){
   reader.onload=e=>{
     const client=clients.find(c=>c.id==id);
     client.original = e.target.result;
-    client.transparent = null;
-    client.bgColor = null;
     ouvrirCrop(id, e.target.result);
   }
   reader.readAsDataURL(file);
@@ -432,7 +486,7 @@ function ajouterPhoto(id,input){
 function rouvrirCrop(id){
   const client = clients.find(c=>c.id==id);
   if(client && client.original){
-    ouvrirCrop(id, client.transparent || client.original, !!client.transparent, client.bgColor);
+    ouvrirCrop(id, client.original);
   }
 }
 
@@ -441,7 +495,7 @@ function rouvrirCrop(id){
 let cropState = null;
 let dragStart = null;
 
-function ouvrirCrop(clientId, dataUrl, hasTransparent, bgColor){
+function ouvrirCrop(clientId, dataUrl){
   const img = new Image();
   img.onload = ()=>{
     cropState = {
@@ -455,9 +509,7 @@ function ouvrirCrop(clientId, dataUrl, hasTransparent, bgColor){
       outH: 540,
       zoom: 1,
       tx: 0,
-      ty: 0,
-      hasTransparent: !!hasTransparent,
-      bgColor: bgColor || null
+      ty: 0
     };
     cropState.baseScale = Math.max(
       cropState.containerW / cropState.naturalW,
@@ -470,9 +522,6 @@ function ouvrirCrop(clientId, dataUrl, hasTransparent, bgColor){
     document.getElementById('crop-zoom').value = 100;
     document.getElementById('crop-modal').classList.add('active');
     updateCropDisplay();
-    updateBgSwatches();
-    document.getElementById('detoure-status').textContent = cropState.hasTransparent ? '✅ Photo déjà détourée' : '';
-    document.getElementById('btn-detoure').textContent = cropState.hasTransparent ? '🪄 Re-détourer l\'arrière-plan (IA)' : '🪄 Détourer l\'arrière-plan (IA)';
   };
   img.src = dataUrl;
 }
@@ -548,81 +597,6 @@ function setupCropDrag(){
   window.addEventListener('touchend', endDrag);
 }
 
-function choisirFond(color){
-  if(!cropState) return;
-  cropState.bgColor = color;
-  document.getElementById('bg-custom').value = color;
-  updateBgSwatches();
-}
-
-function updateBgSwatches(){
-  const color = cropState ? cropState.bgColor : null;
-  document.querySelectorAll('.bg-swatch').forEach(sw=>{
-    sw.classList.toggle('selected', !!color && sw.dataset.color.toLowerCase()===String(color).toLowerCase());
-  });
-}
-
-async function detourerPhoto(){
-  if(!cropState) return;
-  if(!window.imglyRemoveBackground){
-    if(window.imglyLoadError){
-      alert("Le module de détourage n'a pas pu se charger (erreur réseau ou bloqué par le navigateur).\n\nDétail technique : " + window.imglyLoadError.message + "\n\nVérifie ta connexion internet, désactive un éventuel bloqueur de script, puis recharge la page.");
-    } else {
-      alert("Le module de détourage est encore en train de se charger, réessaie dans quelques secondes.");
-    }
-    return;
-  }
-  const client = clients.find(c=>c.id == cropState.clientId);
-  if(!client || !client.original) return;
-
-  const btn = document.getElementById('btn-detoure');
-  const status = document.getElementById('detoure-status');
-  btn.disabled = true;
-  status.textContent = '⏳ Préparation...';
-
-  try{
-    const blob = await window.imglyRemoveBackground(client.original, {
-      model: 'small',
-      progress: (key, current, total)=>{
-        status.textContent = `⏳ Téléchargement IA : ${Math.round(current/total*100)}%`;
-      }
-    });
-    const dataUrl = await new Promise((resolve,reject)=>{
-      const r = new FileReader();
-      r.onload = ()=>resolve(r.result);
-      r.onerror = reject;
-      r.readAsDataURL(blob);
-    });
-
-    client.transparent = dataUrl;
-    if(!cropState.bgColor){ cropState.bgColor = '#ffffff'; }
-    client.bgColor = cropState.bgColor;
-
-    const img = new Image();
-    img.onload = ()=>{
-      cropState.img = img;
-      cropState.naturalW = img.naturalWidth;
-      cropState.naturalH = img.naturalHeight;
-      cropState.hasTransparent = true;
-      cropState.baseScale = Math.max(cropState.containerW/cropState.naturalW, cropState.containerH/cropState.naturalH);
-      cropState.zoom = 1;
-      document.getElementById('crop-zoom').value = 100;
-      centerImage();
-      document.getElementById('crop-img').src = dataUrl;
-      updateCropDisplay();
-      updateBgSwatches();
-      status.textContent = '✅ Détourage terminé — choisis une couleur de fond si besoin';
-      btn.textContent = "🪄 Re-détourer l'arrière-plan (IA)";
-      btn.disabled = false;
-    };
-    img.src = dataUrl;
-  } catch(err){
-    console.error(err);
-    status.textContent = '❌ Échec : ' + (err && err.message ? err.message : 'erreur inconnue');
-    btn.disabled = false;
-  }
-}
-
 function validerCrop(){
   if(!cropState) return;
   const factor = cropState.outW / cropState.containerW;
@@ -631,10 +605,9 @@ function validerCrop(){
   canvas.height = cropState.outH;
   const ctx = canvas.getContext('2d');
 
-  if(cropState.hasTransparent){
-    ctx.fillStyle = cropState.bgColor || '#ffffff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
+  // Fond blanc de sécurité (évite un rendu noir si jamais une image avec transparence est chargée)
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const dispW = cropState.naturalW * cropState.baseScale * cropState.zoom * factor;
   const dispH = cropState.naturalH * cropState.baseScale * cropState.zoom * factor;
@@ -644,9 +617,6 @@ function validerCrop(){
 
   const client = clients.find(c=>c.id == cropState.clientId);
   client.photo = dataUrl;
-  if(cropState.hasTransparent){
-    client.bgColor = cropState.bgColor;
-  }
 
   fermerCrop();
   afficherClients();
@@ -657,8 +627,6 @@ function annulerCrop(){
   const client = clients.find(c=>c.id == (cropState ? cropState.clientId : null));
   if(client && !client.photo){
     client.original = null;
-    client.transparent = null;
-    client.bgColor = null;
   }
   fermerCrop();
   afficherClients();
@@ -675,11 +643,12 @@ function updateStats(){
   let totalPhotos = 0;
   clients.forEach(c=>{ if(c.photo) totalPhotos += c.quantite; });
 
-  const photosParLigne = 5;
-  const lignesParPage = 6;
-  const photosParPage = photosParLigne * lignesParPage;
+  const photosParPage = 30;
   const pages = totalPhotos === 0 ? 0 : Math.ceil(totalPhotos/photosParPage);
-  document.getElementById('stats').innerHTML=`Clients: ${clients.length} | Photos: ${totalPhotos} | Pages A4: ${pages} (30 photos/page)`;
+
+  document.getElementById('statClients').textContent = clients.length;
+  document.getElementById('statPhotos').textContent = totalPhotos;
+  document.getElementById('statPages').textContent = pages;
 }
 
 function genererPlanche(){
@@ -702,7 +671,7 @@ function genererPlanche(){
 
   if(toutesPhotos.length === 0){
     document.getElementById('pages-container').innerHTML =
-      '<div class="a4-page" style="display:flex;align-items:center;justify-content:center;color:#999">Aucune photo ajoutée pour le moment.</div>';
+      '<div class="a4-page"><div class="empty-page-msg"><span>🖼</span>Aucune photo pour l\'instant — ajoute la première photo d\'un client dans l\'onglet Configuration.</div></div>';
     return;
   }
 
