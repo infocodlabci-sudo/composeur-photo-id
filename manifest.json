@@ -1,12 +1,12 @@
 {
-  "name": "Composeur Photo ID PRO - Dépann'Print",
+  "name": "Composeur Photo ID PRO - InfoCodLab CI",
   "short_name": "Photo ID PRO",
   "description": "Composition de planches photo d'identité 35x45mm pour cybercafés et boutiques de tirage photo",
-  "start_url": "./ComposeurPhotoID_Client.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f0f0f0",
-  "theme_color": "#2563eb",
+  "background_color": "#F6F4EF",
+  "theme_color": "#16171B",
   "orientation": "portrait",
   "lang": "fr",
   "icons": [
