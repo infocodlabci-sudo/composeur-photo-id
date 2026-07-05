@@ -1,4 +1,4 @@
-const CACHE_NAME = 'photoid-pro-v4';
+const CACHE_NAME = 'photoid-pro-v5';
 const APP_SHELL = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -22,6 +22,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // Laisser passer TOUS les domaines externes sans interception
+  // (notamment Google Fonts — géré par le cache HTTP natif du navigateur)
   if (url.origin !== self.location.origin) return;
   if (event.request.method !== 'GET') return;
 
