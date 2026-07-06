@@ -233,7 +233,8 @@ input[type=color]{padding:2px;height:38px;cursor:pointer}
       <ul class="feature-list">
         <li>Nombre de clients illimité par planche</li>
         <li>Aucun filigrane sur les pages imprimées</li>
-        <li>Fonctionne hors-ligne une fois activée</li>
+        <li>Valable sur 2 appareils (ex : PC + téléphone)</li>
+        <li>Activation en ligne, puis utilisation hors-ligne</li>
       </ul>
       <button class="btn btn-wave" onclick="doWavePayment()">📲 Payer avec Wave</button>
       <p class="id-hint">Après paiement, envoie ta capture d'écran du reçu Wave sur WhatsApp pour recevoir ton code de licence.</p>
@@ -245,9 +246,10 @@ input[type=color]{padding:2px;height:38px;cursor:pointer}
       <h3 style="color:var(--ink)">Activer ma licence</h3>
       <div class="code-row">
         <input type="text" id="codeInput" placeholder="CPID-XXXX-XXXX-XXXX" oninput="formatLicenseInput(this)">
-        <button class="btn btn-success btn-auto" onclick="activateLicenseCode()">Activer</button>
+        <button class="btn btn-success btn-auto" id="codeActivateBtn" onclick="activateLicenseCode()">Activer</button>
       </div>
       <div id="lic-code-msg" class="lic-msg"></div>
+      <p class="id-hint">Une connexion internet est nécessaire au moment de l'activation (une seule fois par appareil).</p>
     </div>
   </div>
 </div>
@@ -269,6 +271,7 @@ input[type=color]{padding:2px;height:38px;cursor:pointer}
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const QUANTITES = [1,2,3,4,5,6,8,12];
 
@@ -277,8 +280,26 @@ let clients = [];
 /* ===================== LICENCE ===================== */
 // Numéro Wave/Orange Money à modifier avec ton vrai numéro avant publication
 const WAVE_NUMBER = '2250160243904'; // format international sans le +
-const PRICE_LICENCE = 3000; // FCFA — doit rester identique au prix configuré côté admin
+const PRICE_LICENCE = 3000; // FCFA — doit rester identique au prix configuré côté admin (prix de lancement)
 const TRIAL_MAX_CLIENTS = 3;
+
+// Connexion Supabase — vérifie la limite d'appareils au moment de l'activation.
+// Sans ces valeurs correctement configurées, l'activation de licence est impossible.
+const SB_URL  = 'https://qjnghuozejantnpgmsxp.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFqbmdodW96ZWphbnRucGdtc3hwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzNDgzNDQsImV4cCI6MjA5ODkyNDM0NH0.nc5r82zLMzSEfPgWDte68an9W4BI5gUcOYMg5WJCvts';
+let sb = null;
+try { sb = supabase.createClient(SB_URL, SB_ANON); } catch(e) { console.error('Supabase init error', e); }
+
+// Identifiant unique de CET appareil, généré une seule fois et conservé.
+// C'est ce qui permet à Supabase de compter combien d'appareils utilisent un même code.
+function getDeviceId(){
+  let id = localStorage.getItem('cpid_device_id');
+  if(!id){
+    id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,10);
+    localStorage.setItem('cpid_device_id', id);
+  }
+  return id;
+}
 
 // Même algorithme que le dashboard admin : ne pas modifier sans modifier l'admin aussi
 const LICENSE_ALPHA = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -342,20 +363,72 @@ function formatLicenseInput(input){
   input.value = parts.length ? 'CPID-'+parts.join('-') : '';
 }
 
-function activateLicenseCode(){
+async function activateLicenseCode(){
   const raw = document.getElementById('codeInput').value.trim().toUpperCase();
   const msgEl = document.getElementById('lic-code-msg');
+  const btn = document.getElementById('codeActivateBtn');
+
+  // 1) Vérification locale du format (rapide, détecte les fautes de frappe sans réseau)
   if(!isValidLicenseCode(raw)){
     msgEl.innerHTML = '❌ Code invalide. Vérifie la saisie ou contacte le support.';
     msgEl.style.color = 'var(--danger)';
     return;
   }
-  localStorage.setItem('cpid_active_code', raw);
-  msgEl.innerHTML = '✅ Licence activée ! Profite de l\'outil sans limite.';
-  msgEl.style.color = 'var(--success)';
-  refreshLicenceUI();
-  afficherClients();
-  if(document.getElementById('page-preview').classList.contains('active')) genererPlanche();
+
+  if(!sb){
+    msgEl.innerHTML = '❌ Connexion au serveur de licences impossible (configuration manquante).';
+    msgEl.style.color = 'var(--danger)';
+    return;
+  }
+
+  // 2) Vérification réelle côté serveur : le code existe-t-il, et cet appareil est-il autorisé ?
+  msgEl.innerHTML = '⏳ Vérification en cours...';
+  msgEl.style.color = 'var(--ink-soft)';
+  if(btn) btn.disabled = true;
+
+  const deviceId = getDeviceId();
+  const deviceLabel = navigator.userAgent.slice(0,80);
+
+  try{
+    const { data, error } = await sb.rpc('activate_license', {
+      p_code: raw,
+      p_device_id: deviceId,
+      p_device_label: deviceLabel
+    });
+
+    if(error) throw error;
+
+    if(!data.ok){
+      if(data.error === 'device_limit'){
+        msgEl.innerHTML = `❌ Cette licence a déjà atteint sa limite de ${data.max_devices} appareils. Contacte le support pour libérer un appareil.`;
+      } else if(data.error === 'not_found'){
+        msgEl.innerHTML = "❌ Ce code n'existe pas. Vérifie la saisie ou contacte le support.";
+      } else if(data.error === 'revoked'){
+        msgEl.innerHTML = '❌ Cette licence a été désactivée. Contacte le support.';
+      } else {
+        msgEl.innerHTML = '❌ Erreur inconnue. Réessaie ou contacte le support.';
+      }
+      msgEl.style.color = 'var(--danger)';
+      if(btn) btn.disabled = false;
+      return;
+    }
+
+    localStorage.setItem('cpid_active_code', raw);
+    msgEl.innerHTML = data.already_activated
+      ? '✅ Cet appareil était déjà activé — accès débloqué.'
+      : '✅ Licence activée sur cet appareil !';
+    msgEl.style.color = 'var(--success)';
+    refreshLicenceUI();
+    afficherClients();
+    if(document.getElementById('page-preview').classList.contains('active')) genererPlanche();
+
+  } catch(err){
+    console.error(err);
+    msgEl.innerHTML = '❌ Connexion au serveur impossible. Vérifie ta connexion internet et réessaie.';
+    msgEl.style.color = 'var(--danger)';
+  } finally {
+    if(btn) btn.disabled = false;
+  }
 }
 
 function doWavePayment(){
